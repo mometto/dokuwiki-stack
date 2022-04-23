@@ -1,0 +1,40 @@
+version: "3"
+services:
+
+  dokuwiki:
+    container_name: dokuwiki
+    restart: always
+    image: linuxserver/dokuwiki
+    volumes:
+      - dokuwiki-data:/config
+    deploy:
+      labels:
+        - "traefik.http.routers.dokuwiki.rule=Host(`dokuwiki.docker`)"
+        - "traefik.http.routers.dokuwiki.entrypoints=web"
+        - "traefik.docker.network=proxy"  
+        - "traefik.port=80"
+        - "traefik.http.services.dokuwiki.loadbalancer.server.port=80"
+        - "traefik.enable=true"
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+    environment:
+      - PGID=1001
+      - PUID=1001
+      - TZ=EST
+    ports:
+     - 80:80
+    networks:
+      proxy:
+
+networks:
+  proxy:
+    external:
+      name: proxy
+
+volumes:
+  dokuwiki-data:
+    driver: local-persist
+    driver_opts:
+      type: none
+      mountpoint: /docker/dokuwiki
+
